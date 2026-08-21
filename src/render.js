@@ -4,10 +4,20 @@ const MARK = { ok: 'ok', short: 'short', unbacked: 'unbacked' };
 
 const two = (n) => String(n).padStart(2, '0');
 
-function clock(iso) {
+// A session that crosses midnight carries its date, so 02:24-02:23 cannot read backwards.
+function clock(iso, dated = false) {
   if (!iso) return '--:--';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '--:--' : `${two(d.getHours())}:${two(d.getMinutes())}`;
+  if (Number.isNaN(d.getTime())) return '--:--';
+  const time = `${two(d.getHours())}:${two(d.getMinutes())}`;
+  return dated ? `${two(d.getMonth() + 1)}-${two(d.getDate())} ${time}` : time;
+}
+
+function crossesDay(from, to) {
+  const a = new Date(from);
+  const b = new Date(to);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return false;
+  return a.toDateString() !== b.toDateString();
 }
 
 function span(from, to) {
@@ -29,7 +39,7 @@ export function receipt({ findings, summary }) {
   const counts = tally(findings);
   const head = [
     'SESSION RECEIPT',
-    `${clock(summary.from)}-${clock(summary.to)}`,
+    `${clock(summary.from, dated)}-${clock(summary.to, dated)}`,
     span(summary.from, summary.to) ?? '',
     `${summary.files.length} file(s)`,
     `${summary.toolCalls} tool calls`,
