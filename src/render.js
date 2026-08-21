@@ -37,6 +37,7 @@ function pad(text, width) {
 
 export function receipt({ findings, summary }) {
   const counts = tally(findings);
+  const dated = Boolean(summary.from && summary.to) && crossesDay(summary.from, summary.to);
   const head = [
     'SESSION RECEIPT',
     `${clock(summary.from, dated)}-${clock(summary.to, dated)}`,

@@ -66,3 +66,10 @@ test('the digest trends on the halves of the window', () => {
   assert.match(digest([]), /no receipts stored yet\./);
   assert.match(digest([day('2026-08-19', 4), day('2026-08-20', 1)]), /worst family: verified \(5\)/);
 });
+
+test('a session crossing midnight carries its date in the header', () => {
+  const one = receipt({ findings: [], summary: { from: '2026-08-19T20:24:00.000Z', to: '2026-08-22T20:24:00.000Z', files: [], toolCalls: 3 } });
+  assert.match(one.split('\n')[0], /\d\d-\d\d \d\d:\d\d-\d\d-\d\d \d\d:\d\d/);
+  const same = receipt({ findings: [], summary: { from: '2026-08-19T04:00:00.000Z', to: '2026-08-19T05:00:00.000Z', files: [], toolCalls: 3 } });
+  assert.match(same.split('\n')[0], /SESSION RECEIPT {2}\d\d:\d\d-\d\d:\d\d {2}1h00m/);
+});
