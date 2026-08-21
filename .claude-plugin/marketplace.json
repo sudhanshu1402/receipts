@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "receipts",
+  "description": "Checks what the agent said it did against what the transcript shows it did, and prints the difference when it stops.",
+  "owner": {
+    "name": "Sudhanshu Singh",
+    "url": "https://github.com/sudhanshu1402"
+  },
+  "plugins": [
+    {
+      "name": "receipts",
+      "description": "A receipt on every stop: claims made, evidence found, and where they disagree. Reads the transcript on disk, so it costs no context tokens.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@sudhanshu1402/receipts",
+  "version": "0.1.0",
+  "description": "Checks what an AI coding agent said it did against what it actually did, and prints the difference. Reads the Claude Code session transcript, costs no context tokens.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "receipts": "bin/receipts.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "commands",
+    ".claude-plugin"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "receipts": "node bin/receipts.js"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "hooks",
+    "agent-verification",
+    "transcript",
+    "observability",
+    "zero-token"
+  ],
+  "author": "Sudhanshu Singh",
+  "license": "MIT"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "receipts",
+  "description": "Prints a receipt when the agent stops: what it claimed it did, what the transcript shows it did, and where the two disagree. Reads the transcript on disk, so it costs no context tokens.",
+  "author": {
+    "name": "Sudhanshu Singh",
+    "url": "https://github.com/sudhanshu1402"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/receipts.js\" hook",
+            "timeout": 20,
+            "statusMessage": "Checking the receipt..."
+          }
+        ]
+      }
+    ]
+  }
+}
