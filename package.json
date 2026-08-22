@@ -13,7 +13,8 @@
     "bin",
     "src",
     "commands",
-    ".claude-plugin"
+    ".claude-plugin",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "test": "node --test",

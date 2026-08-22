@@ -1,4 +1,5 @@
-import { createReadStream } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
+import { basename, dirname, extname, join } from 'node:path';
 import { createInterface } from 'node:readline';
 
 const TEXT = 'text';
@@ -47,6 +48,8 @@ function normalize(record) {
         toolUseId: block.tool_use_id,
         isError: block.is_error === true,
         denied: block.is_error === true && DENIED.test(resultText(block).trim()),
+        // toolUseResult sits on the record, not in the content block, and names the subagent's own file.
+        agentId: record.toolUseResult?.agentId ?? null,
       });
     }
   }
@@ -99,12 +102,13 @@ export async function readRecords(path) {
   return records;
 }
 
-export function toEvents(records) {
+// A subagent's file is all sidechain; a sidechain record in a main transcript is still not speech.
+export function toEvents(records, { sidechain = false } = {}) {
   const chain = activeChain(records);
   const events = [];
   for (const record of chain) {
     for (const event of normalize(record)) {
-      if (event.sidechain) continue;
+      if (event.sidechain !== sidechain) continue;
       events.push(event);
     }
   }
@@ -117,12 +121,29 @@ export function toEvents(records) {
     const result = resultById.get(event.id);
     event.isError = result?.isError ?? false;
     event.denied = result?.denied ?? false;
+    event.agentId = result?.agentId ?? null;
   }
   return events;
 }
 
 export async function loadEvents(path) {
   return toEvents(await readRecords(path));
+}
+
+// The id comes out of the transcript, so it must not be able to walk out of the session directory.
+const AGENT_ID = /^[A-Za-z0-9_-]+$/;
+
+export function subagentPath(transcriptPath, agentId) {
+  if (typeof agentId !== 'string' || !AGENT_ID.test(agentId)) return null;
+  const session = basename(transcriptPath, extname(transcriptPath));
+  return join(dirname(transcriptPath), session, 'subagents', `agent-${agentId}.jsonl`);
+}
+
+// Absent is normal: sessions older than the subagents/ layout have the id but no file.
+export async function loadAgentEvents(transcriptPath, agentId) {
+  const path = subagentPath(transcriptPath, agentId);
+  if (path === null || !existsSync(path)) return null;
+  return toEvents(await readRecords(path), { sidechain: true });
 }
 
 export const kinds = { TEXT, TOOL_USE, TOOL_RESULT };

@@ -1,5 +1,5 @@
 {
-  "name": "receipts",
+  "name": "claimcheck",
   "description": "Prints a receipt when the agent stops: what it claimed it did, what the transcript shows it did, and where the two disagree. Reads the transcript on disk, so it costs no context tokens.",
   "author": {
     "name": "Sudhanshu Singh",

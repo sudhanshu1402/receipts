@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { loadEvents } from '../src/transcript.js';
-import { analyze, tally, firstBlocking } from '../src/analyze.js';
+import { analyze, resolveDelegates, tally, firstBlocking } from '../src/analyze.js';
 import { receipt, blockLine, statusline, digest } from '../src/render.js';
 import * as store from '../src/store.js';
 
@@ -47,6 +47,11 @@ function findTranscript(target) {
   return newestIn(join(base, slug(process.cwd())));
 }
 
+async function read(transcript, options = {}) {
+  const events = await loadEvents(transcript);
+  return analyze(events, { ...options, delegates: await resolveDelegates(events, transcript) });
+}
+
 async function readStdin() {
   if (process.stdin.isTTY) return {};
   const chunks = [];
@@ -74,7 +79,7 @@ async function runHook() {
 
   // Stop fires every turn, so only claims since the last run are judged.
   const sessionId = payload.session_id ?? null;
-  const result = analyze(await loadEvents(transcript), { since: store.cursor(sessionId) });
+  const result = await read(transcript, { since: store.cursor(sessionId) });
   const counts = tally(result.findings);
   store.setCursor(sessionId, result.lastTs);
 
@@ -107,7 +112,7 @@ async function runShow(target) {
     process.stderr.write('receipts: no transcript found for this folder\n');
     return 1;
   }
-  process.stdout.write(`${receipt(analyze(await loadEvents(transcript)))}\n`);
+  process.stdout.write(`${receipt(await read(transcript))}\n`);
   return 0;
 }
 
@@ -115,7 +120,7 @@ async function runStatusline() {
   const payload = await readStdin();
   const transcript = payload.transcript_path ?? findTranscript(null);
   if (!transcript || !existsSync(transcript)) return 0;
-  const line = statusline(analyze(await loadEvents(transcript)));
+  const line = statusline(await read(transcript));
   if (line) process.stdout.write(line);
   return 0;
 }

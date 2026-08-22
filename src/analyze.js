@@ -1,7 +1,7 @@
 import { families } from './families/index.js';
 import { claimable } from './sanitize.js';
-import { windows, editedFiles, bashCalls, delegated } from './window.js';
-import { kinds } from './transcript.js';
+import { windows, editedFiles, bashCalls, delegateCalls, delegatedIds } from './window.js';
+import { kinds, loadAgentEvents } from './transcript.js';
 
 const MAX_CLAIM = 72;
 
@@ -25,18 +25,90 @@ function summarize(events, since = null) {
   };
 }
 
+// A subagent's tool calls are real work, so they are evidence; its own sentences are not judged.
+export async function resolveDelegates(events, transcriptPath) {
+  const found = new Map();
+  if (!transcriptPath) return found;
+  const queue = delegatedIds(events.filter((e) => e.kind === kinds.TOOL_USE));
+  const seen = new Set(queue);
+  while (queue.length > 0) {
+    const id = queue.shift();
+    const agent = await loadAgentEvents(transcriptPath, id);
+    if (!agent) continue;
+    const calls = agent.filter((e) => e.kind === kinds.TOOL_USE);
+    found.set(id, calls);
+    // A subagent can delegate onward, and that deeper file holds the run its own file lacks.
+    for (const next of delegatedIds(calls)) {
+      if (seen.has(next)) continue;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return found;
+}
+
+// A missing stamp inherits the previous one, so it keeps its place instead of sorting to the
+// front as the oldest thing in the window, and a dateless run is never dropped from evidence.
+function filled(events) {
+  const keyed = [];
+  let carry = '';
+  for (const event of events) {
+    if (event.ts) carry = event.ts;
+    keyed.push([carry, event]);
+  }
+  return keyed;
+}
+
+function ordered(evidence, extra) {
+  const keyed = [...filled(evidence), ...filled(extra)];
+  return keyed.sort((a, b) => a[0].localeCompare(b[0])).map(([, event]) => event);
+}
+
+// Only what the subagent had finished when the sentence was written can back it. A background
+// agent that runs on afterwards is not evidence for a claim made before it started.
+function collect(calls, delegates, cutoff, seen) {
+  const out = [];
+  for (const call of calls) {
+    if (!call.agentId) return null;
+    if (seen.has(call.agentId)) continue;
+    seen.add(call.agentId);
+    const agent = delegates.get(call.agentId);
+    if (!agent) return null;
+    const before = filled(agent).filter(([ts]) => ts <= cutoff).map(([, event]) => event);
+    if (before.length === 0) return null;
+    const nested = collect(delegateCalls(before), delegates, cutoff, seen);
+    if (nested === null) return null;
+    out.push(...before, ...nested);
+  }
+  return out;
+}
+
+// Incomplete evidence is worse than none: one unreadable subagent leaves the whole window unjudged.
+function harvest(evidence, delegates, cutoff) {
+  const calls = delegateCalls(evidence);
+  if (calls.length === 0) return { evidence, viaAgent: false, extra: [] };
+  const extra = cutoff === null ? null : collect(calls, delegates, cutoff, new Set());
+  if (extra === null) return { evidence, viaAgent: true, extra: [] };
+  return { evidence: ordered(evidence, extra), viaAgent: false, extra };
+}
+
 // The cursor is a timestamp, not a turn number, because a rewind renumbers turns.
-export function analyze(events, { since = null } = {}) {
+export function analyze(events, { since = null, delegates = new Map() } = {}) {
   const findings = [];
   const cumulative = [];
+  const harvested = [];
+  // Two windows can delegate to one agent, and the second cutoff re-collects the first slice.
+  const counted = new Set();
   const now = new Date().toISOString();
   let turn = -1;
   let last = since;
   // Only the leading run of judged turns is skipped, so one odd stamp cannot silence the rest.
   let judging = since === null;
-  for (const window of windows(events)) {
+  for (const raw of windows(events)) {
     turn += 1;
-    cumulative.push(...window.evidence);
+    const { evidence, viaAgent, extra } = harvest(raw.evidence, delegates, raw.ts);
+    const window = { ...raw, evidence };
+    cumulative.push(...evidence);
     // A stamp ahead of the clock can never be passed by the cursor, so it is left unjudged.
     if (window.ts !== null && window.ts > now) continue;
     if (window.ts && (last === null || window.ts > last)) last = window.ts;
@@ -44,7 +116,11 @@ export function analyze(events, { since = null } = {}) {
       if (window.ts === null || window.ts <= since) continue;
       judging = true;
     }
-    const viaAgent = delegated(window.evidence);
+    for (const event of extra) {
+      if (counted.has(event)) continue;
+      counted.add(event);
+      harvested.push(event);
+    }
     const context = { cumulative: [...cumulative] };
     for (const sentence of claimable(window.text)) {
       for (const family of families) {
@@ -64,7 +140,8 @@ export function analyze(events, { since = null } = {}) {
       }
     }
   }
-  return { findings, turns: turn + 1, since, lastTs: last, summary: summarize(events, since) };
+  // The header counts the subagents' work too, or it contradicts the rows that were judged on it.
+  return { findings, turns: turn + 1, since, lastTs: last, summary: summarize([...events, ...harvested], since) };
 }
 
 export function tally(findings) {

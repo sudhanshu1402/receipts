@@ -41,3 +41,11 @@ export function reads(evidence) {
 export function delegated(evidence) {
   return evidence.some((call) => DELEGATE_TOOLS.has(call.name));
 }
+
+export function delegateCalls(evidence) {
+  return evidence.filter((call) => DELEGATE_TOOLS.has(call.name));
+}
+
+export function delegatedIds(evidence) {
+  return [...new Set(delegateCalls(evidence).map((call) => call.agentId).filter(Boolean))];
+}

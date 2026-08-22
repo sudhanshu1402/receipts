@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "receipts",
+      "name": "claimcheck",
       "description": "A receipt on every stop: claims made, evidence found, and where they disagree. Reads the transcript on disk, so it costs no context tokens.",
       "source": "./",
       "category": "productivity"

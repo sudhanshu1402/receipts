@@ -36,10 +36,10 @@ As a Claude Code plugin, which wires the end-of-session receipt and `/receipt`:
 
 ```bash
 claude plugin marketplace add sudhanshu1402/receipts
-claude plugin install receipts@receipts
+claude plugin install claimcheck
 ```
 
-The `@receipts` suffix is the marketplace, and it is not optional: the official marketplace ships a different plugin under the same name, so a bare `claude plugin install receipts` installs that one instead. `claude plugin list` should show `receipts@receipts`.
+The plugin is `claimcheck` while the package and the repo are `receipts`, because the official marketplace already ships an unrelated plugin called `receipts` and a bare `claude plugin install receipts` quietly installs that one. `claude plugin list` should show `claimcheck@receipts`. The slash command is still `/receipt`.
 
 Or as a plain CLI, for any transcript on disk:
 
@@ -94,7 +94,7 @@ Four families. Each one only judges claims it can actually settle.
 Being wrong here is worse than being quiet, so each family has a stated ceiling.
 
 - **Reading depth.** A `Read` with a line limit is indistinguishable from a full one, and a `Grep` looks like reading too. The family can tell "some reading happened" from "none happened" and nothing else. It never blocks.
-- **Delegated work.** When the window contains an `Agent` call, the real evidence lives in a subagent transcript this tool does not read. Those claims are printed with `via subagent` and never counted as a lie.
+- **What a subagent said.** When the window contains an `Agent` call, the subagent's own tool calls *are* read — Claude Code writes each one to `<session-id>/subagents/agent-<id>.jsonl`, and the `Agent` result in the main transcript carries the `agentId` that names the file. A command the subagent ran is a real run and a file it edited is a real edit, so a synchronous subagent no longer launders a claim. Three things still are not judged. What the subagent *said* to the orchestrator, which is a different question. Work the subagent did *after* the sentence was written, because a background agent that runs on for another four minutes cannot be evidence for a claim made before it started. And a `SendMessage` to a resumed agent, whose result carries no `agentId` at all. The file is also not always there: measured across every transcript on one machine, 118 of 126 `agentId`s had one, the misses all being older sessions. Whenever a delegated call in a window has no readable file, or had done no work yet when the claim was made, the whole window is marked `via subagent` and never counted as a lie, because partial evidence is worse than none.
 - **Subjectless reports.** "Pushed and live as `21fd5a4`" may be reporting *your* push. Without a first-person subject, an outward claim is marked weak instead of unbacked.
 - **Script aliases.** `npm run verify`, `make check` and `./scripts/ci.sh` may be the test run, the lint, or nothing. When the claim names a subject no visible command matches and an alias like that ran in the same turn, the claim is reported weak instead of unbacked. The alias has to be plausible: one that failed, or one whose own name is a chore (`npm run dev`, `make clean`, `./deploy.sh`), hides nothing and the claim stays unbacked. A flag value is not read as a subject either, so `node scripts/gen.mjs --mode build` is not a build, while `uv run --frozen pytest` is still a test run.
 - **Prose that reads like a report.** "The runner skips the suite unless `RECEIPTS_FULL` is set, and all tests pass" has the same grammar as a real bugfix report, so it is judged as a claim. Position cannot separate the two, and the discriminators that can also move honest sentences. Measured: zero occurrences across 25,480 real assistant sentences. Same class of ceiling for a subject word used as a bare flag (`go run ./cmd/x --test`).
@@ -116,6 +116,8 @@ Reading the transcript instead of the conversation also means the check cannot b
 ## How it works
 
 An evidence window is every tool call since the model last spoke. A claim in a `text` block is checked against the calls that preceded it. Bounding on the agent's own turns avoids having to tell a real user message apart from an injected one, which is guesswork.
+
+A subagent gets its own file next to the session, `<session-id>/subagents/agent-<id>.jsonl`, whose records are all `isSidechain: true`. Those tool calls are merged into the window that launched them, ordered by timestamp and clipped at the claim's own timestamp, so "I fixed all 5 files" is checked against the main thread's edits *and* the subagent's, but never against work that happened after the sentence. If the subagent delegated onward, that deeper file is followed too. A sidechain record sitting in a main transcript is still dropped — that is not the agent speaking to you.
 
 Each transcript record holds exactly one content block, so a `tool_use` and its `tool_result` are separate records, paired by id. A rewind branches the file, so the live thread is found by walking `parentUuid` back from the newest leaf rather than trusting file order. A compaction writes a record with `parentUuid: null` and the previous thread hanging off `logicalParentUuid`; crossing that keeps the whole session in one receipt.
 

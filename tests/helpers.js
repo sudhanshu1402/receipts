@@ -11,7 +11,7 @@ export function reset() {
 
 function record(parentUuid, type, content, extra = {}) {
   const uuid = next();
-  return {
+  const rec = {
     uuid,
     parentUuid,
     type,
@@ -21,6 +21,8 @@ function record(parentUuid, type, content, extra = {}) {
     isSidechain: extra.sidechain ?? false,
     message: { role: type, content },
   };
+  if (extra.toolUseResult) rec.toolUseResult = extra.toolUseResult;
+  return rec;
 }
 
 // Builds a transcript the way Claude Code writes one: one block per record, chained by parentUuid.
@@ -47,14 +49,17 @@ export function transcript() {
       push(record(parent, 'assistant', [{ type: 'thinking', thinking: text }], extra));
       return api;
     },
-    tool(name, input, { isError = false, denied = false, output = null, ...extra } = {}) {
+    tool(name, input, { isError = false, denied = false, output = null, toolUseResult = null, ...extra } = {}) {
       const id = `tool-${next()}`;
       const content = output ?? (denied
         ? "The user doesn't want to proceed with this tool use. The tool use was rejected."
         : 'ok');
       push(record(parent, 'assistant', [{ type: 'tool_use', id, name, input }], extra));
-      push(record(parent, 'user', [{ type: 'tool_result', tool_use_id: id, is_error: isError || denied, content }], extra));
+      push(record(parent, 'user', [{ type: 'tool_result', tool_use_id: id, is_error: isError || denied, content }], { ...extra, toolUseResult }));
       return api;
+    },
+    agent(description, { agentId = null, ...extra } = {}) {
+      return api.tool('Agent', { description }, { ...extra, toolUseResult: agentId ? { agentId, status: 'completed' } : null });
     },
     edit(path, extra) {
       return api.tool('Edit', { file_path: path }, extra);
