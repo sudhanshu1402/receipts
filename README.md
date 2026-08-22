@@ -36,8 +36,10 @@ As a Claude Code plugin, which wires the end-of-session receipt and `/receipt`:
 
 ```bash
 claude plugin marketplace add sudhanshu1402/receipts
-claude plugin install receipts
+claude plugin install receipts@receipts
 ```
+
+The `@receipts` suffix is the marketplace, and it is not optional: the official marketplace ships a different plugin under the same name, so a bare `claude plugin install receipts` installs that one instead. `claude plugin list` should show `receipts@receipts`.
 
 Or as a plain CLI, for any transcript on disk:
 
