@@ -1,6 +1,6 @@
 {
   "name": "@sudhanshu1402/receipts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Checks what an AI coding agent said it did against what it actually did, and prints the difference. Reads the Claude Code session transcript, costs no context tokens.",
   "type": "module",
   "engines": {
