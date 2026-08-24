@@ -18,7 +18,8 @@
   ],
   "scripts": {
     "test": "node --test",
-    "receipts": "node bin/receipts.js"
+    "receipts": "node bin/receipts.js",
+    "assets": "node scripts/make-readme-svg.mjs"
   },
   "keywords": [
     "claude-code",
@@ -30,5 +31,13 @@
     "zero-token"
   ],
   "author": "Sudhanshu Singh",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sudhanshu1402/receipts.git"
+  },
+  "homepage": "https://github.com/sudhanshu1402/receipts#readme",
+  "bugs": {
+    "url": "https://github.com/sudhanshu1402/receipts/issues"
+  }
 }
