@@ -111,21 +111,107 @@ function spans(line, index) {
   return `<tspan fill="${base}">${cells(head)}</tspan><tspan fill="${tint}">${cells(line.slice(verdict.index + 1))}</tspan>`;
 }
 
-function svg(lines, title) {
-  const width = Math.round(Math.max(...lines.map((l) => l.length), title.length + 24) * CELL + PAD * 2);
-  const height = BAR + lines.length * LINE + PAD;
+const MONO = 'ui-monospace,SFMono-Regular,Menlo,monospace';
+const LOOP = 12;
+const TYPED = 1.8;
+
+function at(seconds) {
+  return (Math.min(seconds, LOOP) / LOOP).toFixed(4);
+}
+
+function frame(width, height, title, extra = '') {
   const dots = ['#ff5f57', '#febc2e', '#28c840']
     .map((fill, i) => `<circle cx="${20 + i * 18}" cy="19" r="6" fill="${fill}"/>`)
     .join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(title)}">
+${extra}  <rect width="${width}" height="${height}" rx="10" fill="${COLOR.bg}" stroke="${COLOR.chrome}"/>
+  <path d="M0 10a10 10 0 0 1 10-10h${width - 20}a10 10 0 0 1 10 10v28H0z" fill="${COLOR.bar}"/>
+  ${dots}
+  <text x="${PAD + 48}" y="23" font-family="${MONO}" font-size="12" fill="${COLOR.dim}">${escape(title)}</text>`;
+}
+
+function box(lines, title, extraRows = 0) {
+  return {
+    width: Math.round(Math.max(...lines.map((l) => l.length), title.length + 24) * CELL + PAD * 2),
+    height: BAR + (lines.length + extraRows) * LINE + PAD,
+  };
+}
+
+// Base values are the finished frame, so a renderer that ignores SMIL shows the whole terminal,
+// and the animation plays once rather than moving forever under an <img> nobody can pause.
+function animated(lines, command, title) {
+  const typed = command.length + 2;
+  const caret = PAD + typed * CELL;
+  const step = Math.min(0.32, (LOOP - TYPED - 1.5) / Math.max(lines.length, 1));
+  const { width, height } = box([`$ ${command}`, ...lines], title, 2);
+  const typing = `  <defs>
+    <clipPath id="typing">
+      <rect x="${PAD}" y="${BAR}" width="${typed * CELL}" height="${LINE}">
+        <animate attributeName="width" values="0;0;${typed * CELL};${typed * CELL}" keyTimes="0;${at(0.4)};${at(TYPED)};1" dur="${LOOP}s" repeatCount="1"/>
+      </rect>
+    </clipPath>
+  </defs>
+`;
+  const body = lines
+    .map((line, i) => {
+      const show = at(TYPED + 0.4 + i * step);
+      const y = BAR + 16 + (i + 2) * LINE;
+      return `<text x="${PAD}" y="${y}">${spans(line, i)}<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;${show};${(Number(show) + 0.008).toFixed(4)};1" dur="${LOOP}s" repeatCount="1"/></text>`;
+    })
+    .join('\n    ');
+  return `${frame(width, height, title, typing)}
+  <g font-family="${MONO}" font-size="14" font-weight="500">
+    <g clip-path="url(#typing)"><text x="${PAD}" y="${BAR + 16}" fill="${COLOR.good}">$&#160;<tspan fill="${COLOR.head}">${cells(command)}</tspan></text></g>
+    <rect x="${caret}" y="${BAR + 4}" width="8" height="16" fill="${COLOR.head}">
+      <animate attributeName="x" values="${PAD};${PAD};${caret};${caret}" keyTimes="0;${at(0.4)};${at(TYPED)};1" dur="${LOOP}s" repeatCount="1"/>
+      <animate attributeName="opacity" values="1;0;1;0;1" keyTimes="0;0.25;0.5;0.75;1" dur="1.1s" repeatCount="11"/>
+    </rect>
+    ${body}
+  </g>
+</svg>
+`;
+}
+
+const FLOW = [
+  ['AGENT', [['"Tests pass."', COLOR.text], ['"Pushed the branch."', COLOR.text]]],
+  ['TRANSCRIPT', [['session.jsonl', COLOR.text], ['written as it happens', COLOR.dim]]],
+  ['RECEIPTS', [['4 families compare', COLOR.text], ['claim vs tool calls', COLOR.dim]]],
+  ['VERDICT', [['ok, stays silent', COLOR.good], ['unbacked, exit 2', COLOR.bad]]],
+];
+
+function flow() {
+  const width = 880;
+  const height = 200;
+  const boxes = FLOW.map(([role, rows], i) => {
+    const x = 20 + i * 220;
+    const head = `<rect x="${x}" y="52" width="180" height="96" rx="8" fill="${COLOR.bar}" stroke="${COLOR.chrome}"/>
+  <text x="${x + 16}" y="78" fill="${COLOR.dim}" font-size="11" letter-spacing="1">${role}</text>`;
+    const text = rows
+      .map(([line, fill], r) => `<text x="${x + 16}" y="${104 + r * 22}" fill="${fill}" font-size="13">${cells(line)}</text>`)
+      .join('\n  ');
+    const arrow = i === 3
+      ? ''
+      : `<path d="M${x + 186} 100h22" stroke="${COLOR.chrome}" stroke-width="2"/><path d="M${x + 208} 94l12 6-12 6z" fill="${COLOR.chrome}"/>`;
+    return `${head}\n  ${text}\n  ${arrow}`;
+  }).join('\n  ');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="An agent claims tests pass; Claude Code writes the session transcript to disk; receipts compares the claim against the recorded tool calls and either stays silent or exits 2">
+  <rect width="${width}" height="${height}" rx="10" fill="${COLOR.bg}" stroke="${COLOR.chrome}"/>
+  <g font-family="${MONO}">
+  <text x="20" y="32" fill="${COLOR.head}" font-size="14" font-weight="600">how a receipt happens</text>
+  ${boxes}
+  <text x="20" y="180" fill="${COLOR.dim}" font-size="12">receipts reads the file on disk, never the conversation, so it costs 0 context tokens and cannot be argued with</text>
+  </g>
+</svg>
+`;
+}
+
+function svg(lines, title) {
+  const { width, height } = box(lines, title);
   const rows = lines
     .map((line, i) => `<text x="${PAD}" y="${BAR + 16 + i * LINE}">${spans(line, i)}</text>`)
     .join('\n    ');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(title)}">
-  <rect width="${width}" height="${height}" rx="10" fill="${COLOR.bg}" stroke="${COLOR.chrome}"/>
-  <path d="M0 10a10 10 0 0 1 10-10h${width - 20}a10 10 0 0 1 10 10v28H0z" fill="${COLOR.bar}"/>
-  ${dots}
-  <text x="${PAD + 48}" y="23" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="${COLOR.dim}">${escape(title)}</text>
-  <g xml:space="preserve" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="500">
+  return `${frame(width, height, title)}
+  <g font-family="${MONO}" font-size="14" font-weight="500">
     ${rows}
   </g>
 </svg>
@@ -144,12 +230,15 @@ function must(lines, expected) {
   return lines;
 }
 
+const caught = must(run(lie, ['show']), [/ short$/, /"Tests pass\." .* unbacked$/, /no git push .* unbacked$/, /^3 unbacked or short$/]);
+
 const shots = [
-  ['receipt.svg', must(run(lie, ['show']), [/ short$/, /"Tests pass\." .* unbacked$/, /no git push .* unbacked$/, /^3 unbacked or short$/]), 'receipts show'],
-  ['clean.svg', must(run(honest, ['show']), [/all backed\.$/]), 'receipts show'],
-  ['block.svg', must(block(lie), [/^receipts: you said "Tests pass\." but/]), 'Stop hook, exit 2'],
+  ['demo.svg', animated(caught, 'receipts show', 'receipts show')],
+  ['flow.svg', flow()],
+  ['clean.svg', svg(must(run(honest, ['show']), [/all backed\.$/]), 'receipts show')],
+  ['block.svg', svg(must(block(lie), [/^receipts: you said "Tests pass\." but/]), 'Stop hook, exit 2')],
 ];
-for (const [name, lines, title] of shots) {
-  writeFileSync(join(ROOT, 'assets', name), svg(lines, title));
+for (const [name, markup] of shots) {
+  writeFileSync(join(ROOT, 'assets', name), markup);
   process.stdout.write(`wrote assets/${name}\n`);
 }

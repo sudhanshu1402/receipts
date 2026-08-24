@@ -47,4 +47,4 @@ Receipts are stored as markdown under `~/.claude/receipts/` (override with `RECE
 
 ## The images in the README
 
-`npm run assets` regenerates `assets/*.svg`. Each one is real program output: the script builds a throwaway transcript with the test helper, runs `bin/receipts.js` against it, and wraps the captured stdout (or, for the block, stderr with exit 2) in an SVG. A change to the rendering shows up in the picture, so the README cannot drift away from the tool.
+`npm run assets` regenerates `assets/*.svg`. Three of the four are real program output: the script builds a throwaway transcript with the test helper, runs `bin/receipts.js` against it, and wraps the captured stdout (or, for the block, stderr with exit 2) in an SVG. `demo.svg` is that same output with a SMIL reveal on top, playing once, and its base attribute values are the finished frame so a renderer that ignores animation still shows the whole terminal. `flow.svg` is the exception: a hand-drawn diagram with no captured output in it. A change to the rendering shows up in the pictures, so the README cannot drift away from the tool.

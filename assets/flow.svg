@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="200" viewBox="0 0 880 200" role="img" aria-label="An agent claims tests pass; Claude Code writes the session transcript to disk; receipts compares the claim against the recorded tool calls and either stays silent or exits 2">
+  <rect width="880" height="200" rx="10" fill="#0d1117" stroke="#30363d"/>
+  <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace">
+  <text x="20" y="32" fill="#e6edf3" font-size="14" font-weight="600">how a receipt happens</text>
+  <rect x="20" y="52" width="180" height="96" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="36" y="78" fill="#7d8590" font-size="11" letter-spacing="1">AGENT</text>
+  <text x="36" y="104" fill="#c9d1d9" font-size="13">"Tests pass."</text>
+  <text x="36" y="126" fill="#c9d1d9" font-size="13">"Pushed the branch."</text>
+  <path d="M206 100h22" stroke="#30363d" stroke-width="2"/><path d="M228 94l12 6-12 6z" fill="#30363d"/>
+  <rect x="240" y="52" width="180" height="96" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="256" y="78" fill="#7d8590" font-size="11" letter-spacing="1">TRANSCRIPT</text>
+  <text x="256" y="104" fill="#c9d1d9" font-size="13">session.jsonl</text>
+  <text x="256" y="126" fill="#7d8590" font-size="13">written as it happens</text>
+  <path d="M426 100h22" stroke="#30363d" stroke-width="2"/><path d="M448 94l12 6-12 6z" fill="#30363d"/>
+  <rect x="460" y="52" width="180" height="96" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="476" y="78" fill="#7d8590" font-size="11" letter-spacing="1">RECEIPTS</text>
+  <text x="476" y="104" fill="#c9d1d9" font-size="13">4 families compare</text>
+  <text x="476" y="126" fill="#7d8590" font-size="13">claim vs tool calls</text>
+  <path d="M646 100h22" stroke="#30363d" stroke-width="2"/><path d="M668 94l12 6-12 6z" fill="#30363d"/>
+  <rect x="680" y="52" width="180" height="96" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="696" y="78" fill="#7d8590" font-size="11" letter-spacing="1">VERDICT</text>
+  <text x="696" y="104" fill="#3fb950" font-size="13">ok, stays silent</text>
+  <text x="696" y="126" fill="#f85149" font-size="13">unbacked, exit 2</text>
+  
+  <text x="20" y="180" fill="#7d8590" font-size="12">receipts reads the file on disk, never the conversation, so it costs 0 context tokens and cannot be argued with</text>
+  </g>
+</svg>
