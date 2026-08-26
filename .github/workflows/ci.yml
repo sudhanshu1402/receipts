@@ -23,3 +23,5 @@ jobs:
       - run: npm test
       - name: The CLI runs with no session present
         run: node bin/receipts.js digest
+      - name: README diagrams are current
+        run: npm run assets && git add -A -N assets/ && git diff --exit-code assets/
