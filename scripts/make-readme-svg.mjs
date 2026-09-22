@@ -87,6 +87,11 @@ function escape(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// A quote in a label would close the attribute early and break the whole file.
+function attr(text) {
+  return escape(text).replace(/"/g, '&quot;');
+}
+
 // SVG collapses runs of spaces and xml:space is not honoured consistently, so the columns are
 // held apart by non-breaking spaces, which carry the same advance width in a monospace face.
 function cells(text) {
@@ -123,7 +128,7 @@ function frame(width, height, title, extra = '') {
   const dots = ['#ff5f57', '#febc2e', '#28c840']
     .map((fill, i) => `<circle cx="${20 + i * 18}" cy="19" r="6" fill="${fill}"/>`)
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(title)}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${attr(title)}">
 ${extra}  <rect width="${width}" height="${height}" rx="10" fill="${COLOR.bg}" stroke="${COLOR.chrome}"/>
   <path d="M0 10a10 10 0 0 1 10-10h${width - 20}a10 10 0 0 1 10 10v28H0z" fill="${COLOR.bar}"/>
   ${dots}
