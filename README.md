@@ -8,11 +8,11 @@
 [![zero deps](https://img.shields.io/badge/deps-0-2ea44f)](package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-![receipts show: "Fixed all 9 files" is short, "Tests pass" and "I pushed the branch" are unbacked, 3 problems in one turn](assets/demo.svg)
+![receipts show: "Fixed all 9 files" is short, "Tests pass" and "I pushed the branch" are unbacked, 3 problems in one turn](https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/demo.svg)
 
 A Claude Code plugin and CLI that verifies what an AI coding agent claimed against the tool calls in its own session transcript. Catches agent hallucination, false test-pass claims and phantom git pushes, from a `Stop` hook, for zero context tokens.
 
-![An agent claims tests pass; Claude Code writes the session transcript to disk; receipts compares the claim against the recorded tool calls and either stays silent or exits 2](assets/flow.svg)
+![An agent claims tests pass; Claude Code writes the session transcript to disk; receipts compares the claim against the recorded tool calls and either stays silent or exits 2](https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/flow.svg)
 
 ## Install
 
@@ -33,11 +33,11 @@ receipts digest 7                # trend across the last 7 days
 
 ## Honest turn, one line and gone
 
-![A clean receipt: 1 claim, all backed](assets/clean.svg)
+![A clean receipt: 1 claim, all backed](https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/clean.svg)
 
 ## Caught claiming a failed check, the turn stops
 
-![receipts: you said "Tests pass." but `npm test` failed. Prove it or retract it.](assets/block.svg)
+![receipts: you said "Tests pass." but `npm test` failed. Prove it or retract it.](https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/block.svg)
 
 Once per session, one line to the model, exit 2.
 
