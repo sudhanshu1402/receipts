@@ -1,5 +1,5 @@
 ---
-description: Show the receipt for this session — claims made against evidence in the transcript
+description: Show the receipt for this session - claims made against evidence in the transcript
 allowed-tools: Bash(node:*)
 ---
 

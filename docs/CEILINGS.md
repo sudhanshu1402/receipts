@@ -4,7 +4,7 @@ Being wrong here is worse than being quiet, so each family has a stated ceiling.
 
 **Reading depth.** A `Read` with a line limit is indistinguishable from a full one, and a `Grep` looks like reading too. The family can tell "some reading happened" from "none happened" and nothing else. It never blocks.
 
-**What a subagent said.** When the window contains an `Agent` call, the subagent's own tool calls *are* read — Claude Code writes each one to `<session-id>/subagents/agent-<id>.jsonl`, and the `Agent` result in the main transcript carries the `agentId` that names the file. A command the subagent ran is a real run and a file it edited is a real edit, so a synchronous subagent no longer launders a claim.
+**What a subagent said.** When the window contains an `Agent` call, the subagent's own tool calls *are* read - Claude Code writes each one to `<session-id>/subagents/agent-<id>.jsonl`, and the `Agent` result in the main transcript carries the `agentId` that names the file. A command the subagent ran is a real run and a file it edited is a real edit, so a synchronous subagent no longer launders a claim.
 
 Three things still are not judged. What the subagent *said* to the orchestrator, which is a different question. Work the subagent did *after* the sentence was written, because a background agent that runs on for another four minutes cannot be evidence for a claim made before it started. And a `SendMessage` to a resumed agent, whose result carries no `agentId` at all.
 

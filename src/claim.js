@@ -5,7 +5,7 @@ const FILLER = new Set([
 
 export const FIRST_PERSON = /\b(?:i|we|i've|we've|i'm|my|our)\b/i;
 
-const HARD_BREAK = /[.;:!?,()]|--|—/g;
+const HARD_BREAK = /[.;:!?,()]|--|-/g;
 const COORD = /\b(?:and|or|plus|then|but|so)\b/gi;
 
 // A be-verb or conditional in front means passive or hypothetical, not a claim.

@@ -7,7 +7,7 @@ import { analyze, resolveDelegates, tally, firstBlocking } from '../src/analyze.
 import { receipt, blockLine, statusline, digest } from '../src/render.js';
 import * as store from '../src/store.js';
 
-const USAGE = `receipts — checks what the agent said it did against what it did
+const USAGE = `receipts - checks what the agent said it did against what it did
 
   receipts hook              read a Claude Code hook payload on stdin (Stop)
   receipts show [id|path]    print the receipt for a session, newest by default
