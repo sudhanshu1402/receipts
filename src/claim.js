@@ -5,7 +5,10 @@ const FILLER = new Set([
 
 export const FIRST_PERSON = /\b(?:i|we|i've|we've|i'm|my|our)\b/i;
 
-const HARD_BREAK = /[.;:!?,()]|--|-/g;
+// \u2014 is the em dash. It is written as an escape so tools that rewrite
+// em dashes to hyphens cannot turn it into a plain hyphen, which would split
+// hyphenated words like "hand-verified" into separate clauses.
+const HARD_BREAK = /[.;:!?,()]|--|\u2014/g;
 const COORD = /\b(?:and|or|plus|then|but|so)\b/gi;
 
 // A be-verb or conditional in front means passive or hypothetical, not a claim.
