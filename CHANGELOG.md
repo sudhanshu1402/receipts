@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+The npm page now links back to the source. 0.2.0 was published on 2026-08-22, two days before `repository`, `homepage` and `bugs` were added to package.json, so the registry entry has no repository, homepage or issues link. This release carries those fields.
+
+No behaviour change. The CLI usage line and the `/receipt` command description now use a hyphen instead of an em dash, and the clause-break pattern in `src/claim.js` matches the em dash through an escape (`\u2014`). It splits sentences exactly as 0.2.0 did.
+
 ## 0.2.0
 
 Delegated work is now judged instead of excused. A subagent's tool calls are read from `<session-id>/subagents/agent-<id>.jsonl` and merged, in timestamp order, into the window that launched them, so a command the subagent ran counts as a run and a file it edited counts as an edit. A subagent that delegated onward is followed to the deeper file.
