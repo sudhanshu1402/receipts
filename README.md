@@ -1,12 +1,10 @@
-# receipts
+<div align="center">
 
-**Your AI says it fixed all nine files. This tells you it touched three.**
+<img src="https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/hero.svg" width="100%" alt="receipts, printed as a shop receipt: the claim Fixed all 9 files was short, 3 edited; Tests pass was unbacked, npm test failed; I pushed the branch was unbacked, no push ran. 3 problems. Your AI says it fixed all nine files, this tells you it touched three."tests pass"; but npm test failed in the same session. With it: every claim checked against the tool calls in its transcript; unbacked claim caught: the turn stops, exit 2." />
 
-[![CI](https://github.com/sudhanshu1402/receipts/actions/workflows/ci.yml/badge.svg)](https://github.com/sudhanshu1402/receipts/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@sudhanshu1402/receipts?color=cb3837&logo=npm)](https://www.npmjs.com/package/@sudhanshu1402/receipts)
-[![node](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
-[![zero deps](https://img.shields.io/badge/deps-0-2ea44f)](package.json)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/sudhanshu1402/receipts/actions/workflows/ci.yml/badge.svg)](https://github.com/sudhanshu1402/receipts/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@sudhanshu1402/receipts?color=cb3837&logo=npm)](https://www.npmjs.com/package/@sudhanshu1402/receipts) [![node](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org) [![zero deps](https://img.shields.io/badge/deps-0-2ea44f)](package.json) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+</div>
 
 ![receipts show: "Fixed all 9 files" is short, "Tests pass" and "I pushed the branch" are unbacked, 3 problems in one turn](https://raw.githubusercontent.com/sudhanshu1402/receipts/main/assets/demo.svg)
 
@@ -74,6 +72,10 @@ node bin/receipts.js show ~/.claude/projects/<slug>/<session-id>.jsonl
 ```
 
 Every terminal image on this page is captured program output, so a change in rendering shows up in the picture. The flow diagram is the one drawing.
+
+---
+
+<sub>Part of [sudhanshu1402](https://github.com/sudhanshu1402)'s work: [keel](https://github.com/sudhanshu1402/keel) · [nocap](https://github.com/sudhanshu1402/nocap) · **receipts** · [enterprise-auth-stack](https://github.com/sudhanshu1402/enterprise-auth-stack) · [distributed-queue-engine](https://github.com/sudhanshu1402/distributed-queue-engine) · [multi-region-mongo-patterns](https://github.com/sudhanshu1402/multi-region-mongo-patterns) · [otel-sdk-node](https://github.com/sudhanshu1402/otel-sdk-node) · [llm-assessment-pipeline](https://github.com/sudhanshu1402/llm-assessment-pipeline). Write-ups on the [System Design Portal](https://sudhanshu1402.github.io/system-design-portal/).</sub>
 
 ## License
 
